@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <script src="../node_modules/d3/d3.min.js"></script>
+
+    <style>
+        body {
+            padding: 3em;
+        }
+
+        .bar {
+            display: inline-block;
+            width: 20px;
+            height: 75px; /* Will be overriden by d3. */
+            margin-right: 2px;
+            background-color: green;
+        }
+    </style>
+</head>
+<body>
+
+<script>
+    'use strict';
+
+    /*
+     * Create a simple bar chart.
+     */
+
+    const dataset = [5,50,15,20,30];
+
+    // Initially empty, since no divs in the body.
+    const selection = d3.select('body').selectAll('div');
+
+    // Adds the data to the divs.
+    const selectionWithData = selection.data(dataset);
+
+    // Append the elements. More about entering selection: https://github.com/mbostock/d3/wiki/Selections#enter
+    const bars = selectionWithData.enter().append('div');
+
+    bars.classed('bar', true).style('height', function(data) {
+        return data * 5 + 'px';
+    });
+</script>
+
+</body>
+</html>
