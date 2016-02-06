@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <script src="../node_modules/d3/d3.min.js"></script>
+
+    <style>
+        body {
+            padding: 0;
+            margin: 0
+        }
+
+        .bar {
+
+        }
+
+        .bubble {
+
+        }
+
+        #chartArea svg {
+            background-color: lightblue;
+        }
+    </style>
+</head>
+<body>
+
+<div id="chartArea"></div>
+<script>
+    'use strict';
+
+    // Random dataset.
+    const dataset = Array.apply(null, Array(25)).map(function (value, index) {
+        return {
+            x: Math.round(Math.random() * 100),
+            y: Math.round(Math.random() * 100),
+            r: Math.round(5 + Math.random() * 10)
+        };
+    });
+    dataset.push({x: 0, y: 0, r: 10});
+
+    const margin = {top: 20, right: 20, bottom: 60, left: 60};
+
+    const multiplier = 5;
+    const height = 400 - margin.top - margin.bottom;
+    const width = 500 - margin.left - margin.right;
+
+    // Initially empty, since no divs in the body.
+    const svg = d3.select('#chartArea').append('svg')
+            .attr('width', width + margin.left + margin.right)
+            .attr('height', height + margin.top + margin.bottom)
+            .append('g')
+            .attr('transform', 'translate(' + margin.left + ', ' + margin.top + ')');
+
+    // Vertical scalling.
+    const xScale = d3.scale.linear()
+            .domain([0, 100])
+            .range([0, width]);
+
+    // Create the x-axis.
+    const xAxis = d3.svg.axis()
+            .scale(xScale)
+            .orient('bottom')
+            .ticks(20) // How many tick will be on the axis.
+            .innerTickSize(10)
+            .outerTickSize(2);
+
+    // Append it to the canvas.
+    svg.append('g')
+            .classed('x axis', true)
+            .attr('transform', `translate(0, ${height})`)
+            .call(xAxis);
+
+    // Scalling function.
+    const yScale = d3.scale.linear()
+            .domain([0, d3.max(dataset, function (data) {
+                return data.y;
+            })])
+            .range([height, 0]);
+
+    // Create the y-axis.
+    const yAxis = d3.svg.axis()
+            .scale(yScale)
+            .orient('left');
+
+    // Append it to the canvas.
+    svg.append('g')
+            .classed('y axis', true)
+            .attr('transform', `translate(0, 0)`)
+            .call(yAxis);
+
+    const colorScale = d3.scale.quantile()
+            .domain([0, dataset.length / 4, dataset.length])
+            .range(['orange', 'yellow', 'purple']);
+
+    // Adds the data to the divs.
+    const selectionWithData = svg.selectAll('circle').data(dataset);
+
+    // Append the elements. More about entering selection: https://github.com/mbostock/d3/wiki/Selections#enter
+    const bubbles = selectionWithData.enter().append('circle');
+
+    bubbles.classed('bubble', true).attr({
+        cx: function (data) {
+            return xScale(data.x);
+        },
+        cy: function (data) {
+            return yScale(data.y);
+        },
+        r: function (data) {
+            return data.r;
+        },
+        fill: function (data, index) {
+            return colorScale(index);
+        }
+    });
+</script>
+
+</body>
+</html>
