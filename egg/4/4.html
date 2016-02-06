@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <script src="../node_modules/d3/d3.min.js"></script>
+
+    <style>
+        body {
+            padding: 3em;
+        }
+
+        .bar {
+            fill: green;
+        }
+
+        #chartArea {
+            background-color: lightblue;
+        }
+    </style>
+</head>
+<body>
+
+<div id="chartArea"></div>
+
+<script>
+    'use strict';
+
+    /*
+     * Create a simple bar chart in SVG.
+     */
+
+    // Random dataset.
+    const dataset = Array.apply(null, Array(10)).map(function(value, index) {
+        return Math.random() * index;
+    });
+
+    const multiplier = 5;
+    const height = 300;
+    const width = 400;
+
+    // Scalling function.
+    const yScale = d3.scale.linear()
+
+    // Range of values that will be scaled. 0 to the max in the dataset. 1.1 for some spacing on the top.
+        .domain([0, d3.max(dataset) * 1.1])
+
+        // Values from the domain will be scaled to those values.
+        .range([0, height]);
+
+    // Initially empty, since no divs in the body.
+    const svg = d3.select('#chartArea').append('svg').attr({height: height, width: width});
+
+    // Adds the data to the divs.
+    const selectionWithData = svg.selectAll('rect').data(dataset);
+
+    // Append the elements. More about entering selection: https://github.com/mbostock/d3/wiki/Selections#enter
+    const bars = selectionWithData.enter().append('rect');
+
+    bars.classed('bar', true).attr({
+        x: function (data, index) {
+            return index * 22;
+        },
+        // Will make the bars go to the bottom;
+        y: function (data) {
+            return height - yScale(data);
+        },
+        height: function (data) {
+            return yScale(data);
+        },
+        width: '20px'
+    });
+</script>
+
+</body>
+</html>
