@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <script src="../node_modules/d3/d3.min.js"></script>
+
+    <style>
+        body {
+            padding: 3em;
+        }
+
+        .bar {
+
+        }
+
+        .bubble {
+
+        }
+
+        #chartArea svg {
+            background-color: lightblue;
+        }
+    </style>
+</head>
+<body>
+
+<div id="chartArea"></div>
+<button onclick="update()">Update</button>
+<script>
+    'use strict';
+
+    function steppedTransition(selection, time) {
+        selection.transition()
+                .duration(time * 2)
+                .attr('cx', function (data) {
+                    return xScale(data.x);
+                })
+                .transition()
+                .duration(time * 3)
+                .attr('cy', function (data) {
+                    return yScale(data.y);
+                })
+                .transition()
+                .duration(time)
+                .attr('r', function (data) {
+                    return data.r;
+                })
+                .style('fill', 'green');
+    }
+
+    function update() {
+        dataset.forEach(function (datum) {
+            datum.x = Math.random() * 100;
+            datum.y = Math.random() * 100;
+            datum.r = Math.random() * 30;
+        });
+
+        // Call is a method that can call a function providing the selection as an argument.
+        // Also you can provide otehr arguments that will be fed to the called function.
+        svg.selectAll('circle').call(steppedTransition, 200);
+
+    }
+
+    // Random dataset.
+    const dataset = Array.apply(null, Array(10)).map(function (value, index) {
+        return {
+            x: Math.random() * 100,
+            y: Math.random() * 100,
+            r: Math.random() * 30
+        };
+    });
+
+    const margin = {top: 0, right: 0, bottom: 0, left: 0};
+
+    const multiplier = 5;
+    const height = 300 - margin.top - margin.bottom;
+    const width = 400 - margin.left - margin.right;
+
+    // Vertical scalling.
+    const xScale = d3.scale.linear()
+            .domain([0, 100])
+            .range([0, width]);
+
+    // Scalling function.
+    const yScale = d3.scale.linear()
+            .domain([0, d3.max(dataset, function (data) {
+                return data.y;
+            })])
+            .range([height, 0]);
+
+    const colorScale = d3.scale.quantile()
+            .domain([0, dataset.length / 4, dataset.length])
+            .range(['orange', 'yellow', 'purple']);
+
+    // Initially empty, since no divs in the body.
+    const svg = d3.select('#chartArea')
+            .append('svg')
+            .attr({height: height + margin.top + margin.bottom, width: width + margin.left + margin.right})
+            .append('g')
+            .attr('transform', `translate(${margin.left}, ${margin.top})`);
+
+    // Adds the data to the divs.
+    const selectionWithData = svg.selectAll('circle').data(dataset);
+
+    // Append the elements. More about entering selection: https://github.com/mbostock/d3/wiki/Selections#enter
+    const bubbles = selectionWithData.enter().append('circle');
+
+    bubbles.classed('bubble', true).attr({
+        cx: function (data) {
+            return xScale(data.x);
+        },
+        cy: function (data) {
+            return yScale(data.y);
+        },
+        r: function (data) {
+            return data.r;
+        },
+        fill: function (data, index) {
+            return colorScale(index);
+        }
+    }).on('mouseover', function (data) {
+        d3.select(this).style('fill', 'red');
+    }).on('mousedown', function (data) {
+        d3.select(this).attr('r', data.r * 2)
+    }).on('mouseup', function (data) {
+        d3.select(this).attr('r', data.r)
+    });
+</script>
+
+</body>
+</html>
